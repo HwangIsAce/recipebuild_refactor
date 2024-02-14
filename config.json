@@ -1,0 +1,23 @@
+{
+    "data":{
+       "home_dir": "/disk1/data/ing_mlm_data/",
+       "original_dir": "original",
+       "processed_dir": "processed",
+       "for_train_tokenizer_dir": "/disk1/data/ing_mlm_data/processed/v3_ing_title_tag/train.txt"
+    },
+
+    "bert_config": {
+        "resize_embedding": true,
+        "tokenizer": "/home/jaesung/jaesung/research/recipebuild_retactor/resources/recipebuild_tokenizer_ingr_title_tag.json",
+        "vocab_max_size": 50000,
+        "special_tokens": [
+            "[UNK]",
+            "[PAD]",
+            "[CLS]",
+            "[SEP]",
+            "[MASK]"
+        ],
+        "max_len": 512
+    }
+}
+
