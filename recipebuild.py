@@ -1,5 +1,6 @@
 from src import bootstrap  
 from src.recipebuild_tokenizer import RBTokenizer
+from dataloader import *
 
 import torch
 from torch import nn
@@ -17,6 +18,11 @@ rb_config = bootstrap.recipebuildConfig(
 )
 
 # embedding
+
+class TokenEmbedding(nn.Embedding) :
+    def __init__(self, vocab_size, embed_size = 512) :
+        super().__init__(vocab_size, embed_size, padding_idx = 0)
+
 class PositionalEmbedding(nn.Module) :
     def __init__(self, d_model, max_len = rb_config.bert_config['max_len']) :
         super().__init__()
@@ -40,34 +46,52 @@ class PositionalEmbedding(nn.Module) :
 class rbEmbedding(nn.Module):
     def __init__(
             self,
+            vocab_size,
+            embed_size,
+            dropout=0.1,
     ):
         super().__init__()
-        vocab_size = rb_config.bert_config['vocab_max_size'] 
-        embed_size = config.hidden_size # 768
-        dropout = config.hidden_dropout_prob # 0.1
 
-        self.token = nn.Embedding(vocab_size, embed_size)
+        self.token = TokenEmbedding(vocab_size=vocab_size, embed_size=embed_size)
         self.position = PositionalEmbedding(d_model=self.token.embedding_dim)
-        self.segment = nn.Embedding(3, embed_size)
-        self.dropout = nn.Dropout(dropout)
+        self.dropout = nn.Dropout(p=dropout)
+        self.embed_size = embed_size
         
-    def forward(self, x, segment_label):
-        emb_x = self.token(x) + self.position(x) + self.segment(segment_label)
+    def forward(self, x):
+        emb_x = self.token(x) + self.position(x)
         return self.dropout(emb_x)
 
 class recipeBuild(nn.Module):
     def __init__(
             self,
+            vocab_size,
+            embed_size,
+            dropout=0.1,
     ):
         super().__init__()
+        self.embedding = rbEmbedding(vocab_size, embed_size, dropout=0.1)
 
     def forward(self, x):
-        pass
+        x = x['input_ids'].long()
+
+        x = self.embedding(x)
+
+        return x
         
 
 if __name__ == "__main__":
    
+    sample_train_data_path = rb_config.processed_data_folder + '/v3_ing_title_tag_sample/train.txt'
 
-    import IPython; IPython.embed(colosr="Linux"); exit(1)
+    sample_train_loader = MyDataLoader(data_path=sample_train_data_path)
+
+    model = recipeBuild(vocab_size=rb_config.bert_config['vocab_max_size'],
+                        embed_size=config.hidden_size,
+                        dropout=config.hidden_dropout_prob)
+
+    for batch in sample_train_loader:
+        logits = model(batch)
+
+        import IPython; IPython.embed(colosr="Linux"); exit(1)
 
 

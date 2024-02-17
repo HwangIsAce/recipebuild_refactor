@@ -23,7 +23,6 @@ def seed_everything(seed = 21):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = True
 
-
 def dataset_to_tensor(data_path):
     
     # data load
@@ -98,5 +97,9 @@ def MyDataLoader(batch_size=rb_config.bert_config['batch_size'], data_path= rb_c
 if __name__ == "__main__":
 
     data_loader = MyDataLoader(data_path=rb_config.processed_data_folder + '/v3_ing_title_tag_sample/train.txt') 
+
+    # to do
+    # -> masking 
+    # -> padding
 
     import IPython; IPython.embed(colors="Linux"); exit(1)
