@@ -1,4 +1,5 @@
-import bootstrap
+from src import bootstrap
+
 from datasets import load_dataset
 from tokenizers import (Tokenizer, decoders, models, normalizers,
                         pre_tokenizers, processors, trainers)
@@ -9,7 +10,7 @@ class RBTokenizer:
             self, 
             rb_config
         ):
-        self.rb_data = rb_config.data
+        self.rb_data = rb_config.data_config
         self.rb_config = rb_config.bert_config
         
     def __str__(self) -> str:
@@ -56,7 +57,7 @@ class RBTokenizer:
             cls_token="[CLS]",
             sep_token="[SEP]",
             mask_token="[MASK]",
-            max_len=self.rb_tokenizer["max_len"],
+            max_len=self.rb_config["max_len"],
         )
 
 
