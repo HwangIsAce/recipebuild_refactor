@@ -18,7 +18,12 @@
             "[MASK]"
         ],
         "max_len": 512,
-        "batch_size": 32
+        "batch_size": 32,
+        "masking_strategy": {
+            "masking_prob": 0.15,
+            "random_prob": 0.1,
+            "unchanged_prob": 0.1
+        }
     }
 }
 
