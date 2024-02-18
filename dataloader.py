@@ -47,7 +47,7 @@ def dataset_to_tensor(data_path):
     # list of (labels) tensor 
     labels = []
     for v in token:
-        labels.append(torch.Tensor(v))
+        labels.append(torch.tensor(v))
 
     # list of (input_ids) tensor
     input_ids = copy.deepcopy(labels) # have to masking
@@ -134,6 +134,6 @@ def MyDataLoader(batch_size=rb_config.bert_config['batch_size'], data_path= rb_c
 
 if __name__ == "__main__":
 
-    data_loader = MyDataLoader(data_path=rb_config.processed_data_folder + '/v3_ing_title_tag_sample/train.txt') 
+    data_loader = MyDataLoader(data_path=rb_config.processed_data_folder + '/v3_ing_title_tag_sample/train.txt')
 
     import IPython; IPython.embed(colors="Linux"); exit(1)

@@ -23,7 +23,9 @@
             "masking_prob": 0.15,
             "random_prob": 0.1,
             "unchanged_prob": 0.1
-        }
+        },
+        "num_hidden_layer": 3,
+        "num_heads": 8
     }
 }
 
