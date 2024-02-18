@@ -37,7 +37,7 @@ def dataset_to_tensor(data_path):
 
     dataset = []
     for line in lines:
-        dataset.append(line.split('\n')[0])
+        dataset.append('[CLS]' + line.split('\n')[0]) # add [CLS] token
 
     # tokenizer load
     tokenizer = get_tokenizer(rb_config)
@@ -73,7 +73,7 @@ def collate_fn(batch):
     max_len = rb_config.bert_config['max_len']
     # max_len = max([len(sample['input_ids']) for sample in batch])
 
-    for sample in batch:
+    for sample in batch:        
 
         # padding
         diff = max_len - len(sample['input_ids'])
