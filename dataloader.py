@@ -23,6 +23,11 @@ def seed_everything(seed = 21):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = True
 
+def get_tokenizer(config_):
+    tokenizer = RBTokenizer(config_)
+    tokenizer.load()
+    return tokenizer.tokenizer 
+
 def dataset_to_tensor(data_path):
     
     # data load
@@ -35,10 +40,8 @@ def dataset_to_tensor(data_path):
         dataset.append(line.split('\n')[0])
 
     # tokenizer load
-    tokenizer = RBTokenizer(rb_config)
-    tokenizer.load()
-    tokenizer = tokenizer.tokenizer
-
+    tokenizer = get_tokenizer(rb_config)
+    
     token = tokenizer(dataset)['input_ids']
 
     # list of (labels) tensor 
@@ -75,27 +78,31 @@ def collate_fn(batch):
         # padding
         diff = max_len - len(sample['input_ids'])
         
-        zero_pad = torch.zeros(size= (diff,))
+        pad = torch.ones(size= (diff,))
 
-        collate_input_ids.append(torch.cat([sample['input_ids'].view([len(sample['input_ids'])]), zero_pad], dim=0))
-        collate_labels.append(torch.cat([sample['labels'].view([len(sample['labels'])]), zero_pad], dim=0))
+        collate_input_ids.append(torch.cat([sample['input_ids'].view([len(sample['input_ids'])]), pad], dim=0))
+        collate_labels.append(torch.cat([sample['labels'].view([len(sample['labels'])]), pad], dim=0))
 
         input_ids = torch.stack(collate_input_ids)
         labels = torch.stack(collate_labels)
 
+        
         # masking
-        masking_prob =0.15
+        masking_strategy_config = rb_config.bert_config['masking_strategy']
+
+        masking_prob = masking_strategy_config['masking_prob']
         full_mask = torch.randn(input_ids.shape) < masking_prob
 
-        special_tokens = [0, 1, 2, 3, 4]
+        tokenizer = get_tokenizer(rb_config)
+        special_tokens = list(tokenizer.added_tokens_decoder.keys())
         for tk in special_tokens:
             full_mask = full_mask & (input_ids != tk)
 
-        random_prob = 0.1
+        random_prob = masking_strategy_config['random_prob']
         random_mask = torch.randn(input_ids.shape) < random_prob
         full_mask_with_random = full_mask & (random_mask)
 
-        unchanged_prob = 0.1
+        unchanged_prob = masking_strategy_config['unchanged_prob']
         unchanged_mask = torch.randn(input_ids.shape) < unchanged_prob
         full_mask_with_unchanged = full_mask & (unchanged_mask)
 
@@ -128,9 +135,5 @@ def MyDataLoader(batch_size=rb_config.bert_config['batch_size'], data_path= rb_c
 if __name__ == "__main__":
 
     data_loader = MyDataLoader(data_path=rb_config.processed_data_folder + '/v3_ing_title_tag_sample/train.txt') 
-
-    # to do
-    # -> masking 
-    # -> padding
 
     import IPython; IPython.embed(colors="Linux"); exit(1)
