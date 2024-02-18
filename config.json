@@ -9,7 +9,7 @@
     "bert_config": {
         "resize_embedding": true,
         "tokenizer": "/home/jaesung/jaesung/research/recipebuild_retactor/resources/recipebuild_tokenizer_ingr_title_tag.json",
-        "vocab_max_size": 200000,
+        "vocab_max_size": 199492,
         "special_tokens": [
             "[UNK]",
             "[PAD]",
