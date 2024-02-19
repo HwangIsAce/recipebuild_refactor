@@ -24,6 +24,10 @@ class TensorData(Dataset):
         return self.len
 
 def collate_fn(batch): 
+
+    # get config 
+    rb_config = get_rb_config()
+
     collate_input_ids = []
     collate_labels = []
 
@@ -95,7 +99,7 @@ def MyDataLoader(data_path, config):
         labels.append(torch.tensor(v))
 
     # make list of input_ids tensor
-    input_ids = copy.deepcopy(labels) 
+    input_ids = copy.deepcopy(labels)
 
     data_tensor = TensorData(input_ids, labels)
  
