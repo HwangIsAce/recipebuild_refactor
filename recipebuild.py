@@ -12,14 +12,9 @@ from einops import rearrange
 
 from transformers import BertConfig
 
-# config
-config = BertConfig()
-
-rb_config = bootstrap.recipebuildConfig(
-    path= "/home/jaesung/jaesung/research/recipebuild_retactor/config.json"
-)
 
 ############################################################################
+
 # transformer
 def FeedForward(dim, mult=4, dropout=0.):
 
@@ -108,11 +103,11 @@ class Transformer(nn.Module):
 
 # embedding
 class TokenEmbedding(nn.Embedding) :
-    def __init__(self, vocab_size, embed_size = 512) :
-        super().__init__(vocab_size, embed_size, padding_idx = 0)
+    def __init__(self, vocab_size, dim) :
+        super().__init__(vocab_size, dim, padding_idx = 0)
 
 class PositionalEmbedding(nn.Module) :
-    def __init__(self, d_model, max_len = rb_config.bert_config['max_len']) :
+    def __init__(self, d_model, max_len) :
         super().__init__()
         
         # compute positional encoding in log space
@@ -135,15 +130,16 @@ class rbEmbedding(nn.Module):
     def __init__(
             self,
             vocab_size,
-            embed_size,
-            emb_dropout=0.1,
+            dim,
+            ff_dropout,
+            max_len
     ):
         super().__init__()
 
-        self.token = TokenEmbedding(vocab_size=vocab_size, embed_size=embed_size)
-        self.position = PositionalEmbedding(d_model=self.token.embedding_dim)
-        self.dropout = nn.Dropout(p=emb_dropout)
-        self.embed_size = embed_size
+        self.token = TokenEmbedding(vocab_size=vocab_size, dim=dim)
+        self.position = PositionalEmbedding(d_model=self.token.embedding_dim, max_len=max_len)
+        self.dropout = nn.Dropout(p=ff_dropout)
+        self.embed_size = dim
         
     def forward(self, x):
 
@@ -156,26 +152,30 @@ class rbEmbedding(nn.Module):
 class recipeBuild(nn.Module):
     def __init__(
             self,
-            vocab_size,
-            embed_size,
-            dim,
-            depth,
-            heads,
-            dim_head,
-            attn_dropout,
-            ff_dropout,
-            emb_dropout,
+            config
     ):
         super().__init__()
-        self.embedding = rbEmbedding(vocab_size, embed_size, emb_dropout=emb_dropout)
+
+        self.rb_config = config
+
+        self.depth = self.rb_config.bert_config['num_hidden_layer']
+        self.vocab_size = self.rb_config.bert_config['vocab_max_size']
+        self.dim = self.rb_config.bert_config['hidden_size']
+        self.heads = self.rb_config.bert_config['num_heads']
+        self.dim_head = int(self.dim / self.heads)
+        self.attn_dropout = self.rb_config.bert_config['attention_probs_dropout_prob']
+        self.ff_dropout = self.rb_config.bert_config['hidden_dropout_prob']
+        self.max_len = self.rb_config.bert_config['max_len']
+        
+        self.embedding = rbEmbedding(vocab_size=self.vocab_size, dim=self.dim, ff_dropout=self.ff_dropout, max_len=self.max_len)
 
         self.encoder = Transformer(
-            depth = depth,
-            dim = dim,
-            heads = heads,
-            dim_head = dim_head,
-            attn_dropout = attn_dropout,
-            ff_dropout = ff_dropout
+            depth = self.depth,
+            dim = self.dim,
+            heads = self.heads,
+            dim_head = self.dim_head,
+            attn_dropout = self.attn_dropout,
+            ff_dropout = self.ff_dropout
         )
 
     def forward(self, x):
@@ -190,25 +190,18 @@ class recipeBuild(nn.Module):
         
 if __name__ == "__main__":
 
-    device = ('cuda' if torch.cuda.is_available() else 'cpu')
+    rb_config = bootstrap.recipebuildConfig(
+        path ="/home/jaesung/jaesung/research/recipebuild_retactor/config.json"
+    )
    
     sample_train_data_path = rb_config.processed_data_folder + '/v3_ing_title_tag_sample/train.txt'
 
-    sample_train_loader = MyDataLoader(data_path=sample_train_data_path)
+    sample_train_loader = MyDataLoader(data_path=sample_train_data_path, config=rb_config)
 
-    model = recipeBuild(vocab_size=rb_config.bert_config['vocab_max_size'],
-                        embed_size=config.hidden_size,
-                        dim=config.hidden_size,
-                        depth=rb_config.bert_config['num_hidden_layer'],
-                        heads=rb_config.bert_config['num_heads'],
-                        dim_head=config.hidden_size / rb_config.bert_config['num_heads'],
-                        attn_dropout=config.hidden_dropout_prob,
-                        ff_dropout=config.hidden_dropout_prob,
-                        emb_dropout=config.hidden_dropout_prob)
+    model = recipeBuild(config=rb_config)
 
     for batch in sample_train_loader:
-        logits = model(batch)
+        logits = model(batch['input_ids'])
 
-        import IPython; IPython.embed(colosr="Linux"); exit(1)
 
 
