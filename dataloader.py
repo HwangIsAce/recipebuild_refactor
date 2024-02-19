@@ -104,7 +104,6 @@ def MyDataLoader(data_path, config):
     return data_loader
 
 if __name__ == "__main__":
-    
     rb_config = bootstrap.recipebuildConfig(
         path = "/home/jaesung/jaesung/research/recipebuild_retactor/config.json"
     ) 
