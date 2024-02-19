@@ -20,21 +20,6 @@ rb_config = bootstrap.recipebuildConfig(
 )
 
 ############################################################################
-# mask language head
-
-class maskedLanguageModel(nn.Module):
-    def __init__(
-            self,
-            dim,
-            vocab_size
-    ):
-        super().__init__()
-        self.linear = nn.Linear(dim, vocab_size)
-        self.softmax = nn.LogSoftmax(dim=-1)
-
-    def forward(self, x):
-        return self.softmax(self.linear(x))
-
 # transformer
 def FeedForward(dim, mult=4, dropout=0.):
 
@@ -193,27 +178,16 @@ class recipeBuild(nn.Module):
             ff_dropout = ff_dropout
         )
 
-        self.mlm_head = maskedLanguageModel(
-            dim = dim,
-            vocab_size = vocab_size
-        )
-
     def forward(self, x):
         
-        x = x['input_ids'].long()
-
         # data embedding
-        x = self.embedding(x)
+        x = self.embedding(x.long())
 
         # transformer (+attn +ffn)
         x = self.encoder(x)
 
-        # mlm head
-        x = self.mlm_head(x)
-
         return x
         
-
 if __name__ == "__main__":
 
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
