@@ -11,6 +11,8 @@ from src import bootstrap
 
 from transformers import BertConfig
 
+def get_rb_config():
+    return bootstrap.recipebuildConfig(path="/home/jaesung/jaesung/research/recipebuild_retactor/config.json")
 
 def seed_everything(seed = 21):
     random.seed(seed)
@@ -35,4 +37,3 @@ def load_dataset(path):
         dataset.append('[CLS]' + line.split('\n')[0])
 
     return dataset
-

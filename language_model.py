@@ -14,7 +14,7 @@ class maskedLanguageModel(nn.Module):
     ):
         super().__init__()
 
-        self.linear = nn.Linear(dim=dim, vocab_size=vocab_size)
+        self.linear = nn.Linear(dim, vocab_size)
 
         self.softmax = nn.LogSoftmax(dim=-1)
 
@@ -35,9 +35,9 @@ class rbLanguageModel(nn.Module):
         self.dim = self.rb_config.bert_config['hidden_size']
         self.vocab_size = self.rb_config.bert_config['vocab_max_size']
 
-        self.recipebuild = model(config) # recipebuild
+        self.recipebuild = model(config=self.rb_config) # recipebuild
         
-        self.mask_lm = maskedLanguageModel(self.dim, self.vocab_size)
+        self.mask_lm = maskedLanguageModel(dim=self.dim, vocab_size=self.vocab_size)
 
     def forward(self, x):
 

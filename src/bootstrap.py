@@ -24,7 +24,7 @@ class recipebuildConfig:
         self.original_data_folder = f"{self.static_config['data']['home_dir']}/{self.static_config['data']['original_dir']}"
 
         # after data precessing (processed data path)
-        self.processed_data_folder = f"{self.static_config['data']['home_dir']}/{self.static_config['data']['processed_dir']}"
+        self.processed_data_folder = f"{self.static_config['data']['home_dir']}/{self.static_config['data']['processed_dir']}/v3_ing_title_tag"
 
         # tokenizer 
         self.tokenizer = self.static_config['bert_config']['tokenizer']
